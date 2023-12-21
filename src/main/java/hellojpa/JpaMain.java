@@ -29,32 +29,27 @@ public class JpaMain {
 
             System.out.println("===================");
              */
-            Member member1 = new Member();
-            member1.setName("A");
-            member1.setAge(17);
-            member1.setRoleType(RoleType.USER);
 
-            Member member2 = new Member();
-            member2.setName("B");
-            member2.setAge(18);
-            member2.setRoleType(RoleType.USER);
+            Team team = new Team();
+            team.setName("TeamA");
+            em.persist(team);
 
-            Member member3 = new Member();
-            member3.setName("C");
-            member3.setAge(19);
-            member3.setRoleType(RoleType.ADMIN);
+            Member member = new Member();
+            member.setUsername("member1");
+            member.changeTeam(team);
+            em.persist(member);
+            //team.getMembers().add(member); 역방향 연관관계 설정 db에 저장이 안된다
+            System.out.println("team.getMembers().add(member) = " + team.getMembers().add(member));
 
-            System.out.println("===================");
+            em.flush();
+            em.clear();
 
-            em.persist(member1);
-            em.persist(member2);
-            em.persist(member3);
+            Member findMember = em.find(Member.class, member.getId());
+            List<Member> members = findMember.getTeam().getMembers();
 
-            System.out.println("member.getId() = " + member1.getId());
-            System.out.println("member2.getId() = " + member2.getId());
-            System.out.println("member3.getId() = " + member3.getId());
-
-            System.out.println("===================");
+            for (Member m : members) {
+                System.out.println("m.getUsername() = " + m.getUsername());
+            }
 
             tx.commit();
         } catch (Exception e) {

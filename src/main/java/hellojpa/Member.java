@@ -3,55 +3,44 @@ package hellojpa;
 import javax.persistence.*;
 import java.util.Date;
 @Entity
-@SequenceGenerator(
-        name = "MEMBER_SEQ_GENERATOR",
-        sequenceName = "MEMBER_SEQ",
-        initialValue = 1, allocationSize = 50)// 50개씩 미리 메모리로 땡겨와서 쓰는 것 성능 최적화
 public class Member {
-    @Id //id만 쓰면 직접 할당
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-    generator = "MEMBER_SEQ_GENERATOR")
+    @Id
+    @GeneratedValue
+    @Column(name = "MEMBER_ID")
     private Long id;
-    @Column(name = "name", nullable = false) //notnull
+
+    @Column(name = "USERNAME")
     private String username;
-    private Integer age;
-    @Enumerated(EnumType.STRING)//기본은 오디널(0,1,2)로, 타입을 스트링으로 바꿔야 추가했을 때 오류가 안난다
-    private RoleType roleType;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastModifiedDate;
-    @Lob//varchar을 넘어선 큰 타입
-    private String description;
+
+    //@Column(name = "TEAM_ID")
+    //private Long teamid;
+
+    @ManyToOne // 1대다 연관관계 맵핑
+    @JoinColumn(name = "TEAM_ID")
+    private Team team;
 
     public Long getId() {
         return id;
     }
 
-    public Member() {
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setName(String name) {
-        this.username = name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setAge(Integer age) {
-        this.age = age;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setRoleType(RoleType roleType) {
-        this.roleType = roleType;
+    public Team getTeam() {
+        return team;
     }
 
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public void setLastModifiedDate(Date lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void changeTeam(Team team) {
+        this.team = team;
+        team.getMembers().add(this); //양방향 연관관계 주입 한쪽만 설정해도 양쪽에 자동으로 설정 됨
     }
 }
