@@ -15,9 +15,13 @@ public class Member {
     //@Column(name = "TEAM_ID")
     //private Long teamid;
 
-    @ManyToOne // 1대다 연관관계 맵핑
+    @ManyToOne // 다대1 연관관계 맵핑
     @JoinColumn(name = "TEAM_ID")
     private Team team;
+
+    @OneToOne // 1대1 매
+    @JoinColumn(name = "LOCKER_ID")
+    private Locker locker;
 
     public Long getId() {
         return id;
@@ -41,6 +45,6 @@ public class Member {
 
     public void changeTeam(Team team) {
         this.team = team;
-        team.getMembers().add(this); //양방향 연관관계 주입 한쪽만 설정해도 양쪽에 자동으로 설정 됨
+        //team.getMembers().add(this); //양방향 연관관계 주입 한쪽만 설정해도 양쪽에 자동으로 설정
     }
 }

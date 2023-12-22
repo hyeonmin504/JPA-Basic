@@ -36,9 +36,12 @@ public class JpaMain {
 
             Member member = new Member();
             member.setUsername("member1");
-            member.changeTeam(team);
             em.persist(member);
-            //team.getMembers().add(member); 역방향 연관관계 설정 db에 저장이 안된다
+
+
+            member.changeTeam(team);
+            //team.getMembers().add(member); // 역방향 연관관계 설정 db에 저장이 안된다
+
             System.out.println("team.getMembers().add(member) = " + team.getMembers().add(member));
 
             em.flush();

@@ -12,7 +12,7 @@ public class Team {
     @Column(name = "TEAM_ID")
     private Long id;
     private String name;
-    @OneToMany(mappedBy = "team")
+    @OneToMany(mappedBy = "team") //@JoinColumn(name = "TEAM_ID") 일대다 사용시, 잘 안씀
     private List<Member> members = new ArrayList<>();
 
     public List<Member> getMembers() {
