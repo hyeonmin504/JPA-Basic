@@ -38,10 +38,14 @@ public class JpaMain {
             member.setUsername("member1");
             em.persist(member);
 
+
             member.changeTeam(team);
             //team.getMembers().add(member); // 역방향 연관관계 설정 db에 저장이 안된다
 
             System.out.println("team.getMembers().add(member) = " + team.getMembers().add(member));
+
+            em.flush();
+            em.clear();
 
             Member findMember = em.find(Member.class, member.getId());
             List<Member> members = findMember.getTeam().getMembers();
@@ -49,14 +53,6 @@ public class JpaMain {
             for (Member m : members) {
                 System.out.println("m.getUsername() = " + m.getUsername());
             }
-
-            Movie movie = new Movie();
-            movie.setActor("bbb");
-            movie.setDirector("aaa");
-            movie.setName("바람과함께 사라지다");
-            movie.setPrice(20000);
-
-            em.persist(movie);
 
             tx.commit();
         } catch (Exception e) {
