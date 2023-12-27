@@ -1,9 +1,10 @@
 package hellojpa;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 @Entity
-public class Member {
+public class Member extends BaseEntitiy{
     @Id
     @GeneratedValue
     @Column(name = "MEMBER_ID")
@@ -22,6 +23,7 @@ public class Member {
     @OneToOne // 1대1 매
     @JoinColumn(name = "LOCKER_ID")
     private Locker locker;
+
 
     public Long getId() {
         return id;
