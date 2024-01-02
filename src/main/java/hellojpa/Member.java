@@ -16,7 +16,8 @@ public class Member extends BaseEntitiy{
     //@Column(name = "TEAM_ID")
     //private Long teamid;
 
-    @ManyToOne // 다대1 연관관계 맵핑
+    //(fetch = FetchType.EAGER -> 한번에 즉시로딩 함 ** 실무에선 지양
+    @ManyToOne(fetch = FetchType.LAZY) // team을 프록시 객체로 지연로딩 함
     @JoinColumn(name = "TEAM_ID")
     private Team team;
 

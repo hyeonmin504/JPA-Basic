@@ -39,14 +39,45 @@ public class JpaMain {
             member.setCreateBy("kim");
             member.setCreatedDate(LocalDateTime.now());
             member.setUsername("member1");
-            em.persist(member);
-
             member.changeTeam(team);
+
+            em.persist(member);
+            
             //team.getMembers().add(member); // 역방향 연관관계 설정 db에 저장이 안된다
+            
+            em.flush();
+            em.clear();
 
-            System.out.println("team.getMembers().add(member) = " + team.getMembers().add(member));
+            Member m = em.find(Member.class, member.getId());
+            System.out.println("member.getTeam().getClass() = " + m.getTeam().getClass());
+            //가짜(프록시) 엔티티 객체에 조회
+            Member findMember = em.getReference(Member.class, member.getId());
+            System.out.println("findMember.getId() = " + findMember.getId());
+            System.out.println("findMember.getClass() = " + findMember.getClass());
+            System.out.println("emf.getPersistenceUnitUtil().isLoaded(findMember) = " + emf.getPersistenceUnitUtil().isLoaded(findMember));
+            //username을 검색하기 위해서 검색
+            System.out.println("findMember.getUsername() = " + findMember.getUsername());
+            //프록시 초기화 여부 확인
+            System.out.println("emf.getPersistenceUnitUtil().isLoaded(findMember) = " + emf.getPersistenceUnitUtil().isLoaded(findMember));
 
-            Member findMember = em.find(Member.class, member.getId());
+            //**************************//
+            Child child = new Child();
+            Child child1 = new Child();
+
+            Parent parent = new Parent();
+            parent.addChild(child);
+            parent.addChild(child1);
+
+            em.persist(parent);
+
+            em.flush();
+            em.clear();
+
+            //orphanRemoval = true -> 리스트에서 빠진 애는 자동 삭제된다
+            Parent findParent = em.find(Parent.class, parent.getId());
+            findParent.getChildList().remove(0);
+            em.remove(findParent); // (orphan = true) + cascade로 다 삭제 = 자식 객체 생명주기를 parent가 관리한다
+/*
             List<Member> members = findMember.getTeam().getMembers();
 
             for (Member m : members) {
@@ -60,7 +91,7 @@ public class JpaMain {
             movie.setPrice(20000);
 
             em.persist(movie);
-
+ */
             tx.commit();
         } catch (Exception e) {
             tx.rollback();
@@ -68,5 +99,17 @@ public class JpaMain {
             em.close();
         }
         emf.close();
+    }
+    //지연로딩 프록시
+    private  static void printMember(Member member) {
+        System.out.println("member.getUsername() = " + member.getUsername());
+    }
+    private static void printMemberAndTeam(Member member){
+        String username = member.getUsername();
+        System.out.println("username = " + username);
+
+        Team team = member.getTeam();
+        System.out.println("team.getName() = " + team.getName());
+
     }
 }
