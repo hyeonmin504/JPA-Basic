@@ -6,6 +6,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public class JpaMain {
     public static void main(String[] args) {
@@ -48,17 +49,18 @@ public class JpaMain {
             em.flush();
             em.clear();
 
-            Member m = em.find(Member.class, member.getId());
-            System.out.println("member.getTeam().getClass() = " + m.getTeam().getClass());
+            //Member m = em.find(Member.class, member.getId());
+            //System.out.println("member.getTeam().getClass() = " + m.getTeam().getClass());
+
             //가짜(프록시) 엔티티 객체에 조회
             Member findMember = em.getReference(Member.class, member.getId());
             System.out.println("findMember.getId() = " + findMember.getId());
             System.out.println("findMember.getClass() = " + findMember.getClass());
-            System.out.println("emf.getPersistenceUnitUtil().isLoaded(findMember) = " + emf.getPersistenceUnitUtil().isLoaded(findMember));
+            System.out.println("emf.getPersistenceUnitUtil().isLoaded(findMember)2 = " + emf.getPersistenceUnitUtil().isLoaded(findMember));
             //username을 검색하기 위해서 검색
             System.out.println("findMember.getUsername() = " + findMember.getUsername());
             //프록시 초기화 여부 확인
-            System.out.println("emf.getPersistenceUnitUtil().isLoaded(findMember) = " + emf.getPersistenceUnitUtil().isLoaded(findMember));
+            System.out.println("emf.getPersistenceUnitUtil().isLoaded(findMember)3 = " + emf.getPersistenceUnitUtil().isLoaded(findMember));
 
             //**************************//
             Child child = new Child();
@@ -92,6 +94,52 @@ public class JpaMain {
 
             em.persist(movie);
  */
+
+            //객체 타입으로 인해 값이 둘다 바뀌는 예제
+            Member member2 = new Member();
+            member2.setUsername("member2");
+            Address homeAddress = new Address("city", "street", "10000");
+            member2.setAddress(homeAddress);
+/*
+            Member member3 = new Member();
+            member3.setAddress(address);
+            em.persist(member3);
+            //member2.getAddress().setCity("newCity");
+
+            //이 오류를 해결하기 위해 생성자로 새로 만들어 값을 통으로 바꿔야 한다.
+            Address newaddress = new Address("newCity", homeAddress.getStreet(), homeAddress.getZipcode());
+            member2.setAddress(newaddress);
+ */
+
+            //멤버에 의존하는 값 타입들 -> ** 진짜 단순한 경우에만 사용하자 업데이트 칠 경우가 없을 때만 1대다관계로 치환하자
+            member2.getFavoriteFoods().add("치킨");
+            member2.getFavoriteFoods().add("피자");
+            member2.getFavoriteFoods().add("족발");
+
+            member2.getAddressHistory().add(new AddressEntity("old1","street", "10000"));
+            member2.getAddressHistory().add(new AddressEntity("old2","street", "10000"));
+            em.persist(member2);
+
+            em.flush();
+            em.clear();
+            System.out.println("JpaMain.main==============================");
+            Member findMember2 = em.find(Member.class, member2.getId());
+
+            List<AddressEntity> addressesHistory = findMember2.getAddressHistory();
+            for (AddressEntity address : addressesHistory) {
+                System.out.println("address.getCity() = " + address.getAddress().getCity());
+            }
+
+            Set<String> favoriteFoods = findMember2.getFavoriteFoods();
+            for (String favoriteFood : favoriteFoods) {
+                System.out.println("favoriteFood = " + favoriteFood);
+            }
+
+            //기본적으로 equals를 이용하므로 재정의를 주의하자
+            findMember2.getAddressHistory().remove(new AddressEntity("old1","street", "10000"));
+            findMember2.getAddressHistory().add(new AddressEntity("newCity","street", "10000"));
+
+
             tx.commit();
         } catch (Exception e) {
             tx.rollback();
@@ -99,17 +147,5 @@ public class JpaMain {
             em.close();
         }
         emf.close();
-    }
-    //지연로딩 프록시
-    private  static void printMember(Member member) {
-        System.out.println("member.getUsername() = " + member.getUsername());
-    }
-    private static void printMemberAndTeam(Member member){
-        String username = member.getUsername();
-        System.out.println("username = " + username);
-
-        Team team = member.getTeam();
-        System.out.println("team.getName() = " + team.getName());
-
     }
 }
