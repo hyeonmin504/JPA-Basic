@@ -4,6 +4,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -111,7 +114,7 @@ public class JpaMain {
             member2.setAddress(newaddress);
  */
 
-            //멤버에 의존하는 값 타입들 -> ** 진짜 단순한 경우에만 사용하자 업데이트 칠 경우가 없을 때만 1대다관계로 치환하자
+            //멤버에 의존하는 값 타입들 -> ** 진짜 단순한 경우에만 사용하자 업데이트 칠 경우가 없을 때만 1대다관계 치환하자
             member2.getFavoriteFoods().add("치킨");
             member2.getFavoriteFoods().add("피자");
             member2.getFavoriteFoods().add("족발");
@@ -139,6 +142,18 @@ public class JpaMain {
             findMember2.getAddressHistory().remove(new AddressEntity("old1","street", "10000"));
             findMember2.getAddressHistory().add(new AddressEntity("newCity","street", "10000"));
 
+            //JPQL 객체를 대상으로 검색
+            List<Member> result = em.createQuery("select m from Member m where m.username like 'kim'",
+                            Member.class)
+                    .getResultList();
+            for (Member member1 : result) {
+                System.out.println("member1 = " + member1);
+            }
+
+            //동적 쿼리가 불편해서 QueryDSL을 사용해보자 or Critria
+
+            //그럼에도 직접 주입해줘야 하는 특정 쿼리는 createnativequery를 사용하자
+            em.createNativeQuery("select Member_id, city, street, zipcodem username from member");
 
             tx.commit();
         } catch (Exception e) {
