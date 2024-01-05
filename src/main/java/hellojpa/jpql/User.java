@@ -5,12 +5,20 @@ import hellojpa.Member;
 import javax.persistence.*;
 
 @Entity
+@NamedQuery( //named 쿼리
+        name = "User.findByUsername",
+        query = "select u from User u where u.username = :username"
+)
 public class User {
     @Id
     @GeneratedValue
     private Long id;
     private String username;
     private int age;
+
+    public void setGroups(Groups groups) {
+        this.groups = groups;
+    }
 
     @Enumerated(EnumType.STRING)
     private MemberType type;
